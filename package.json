@@ -1,0 +1,31 @@
+{
+  "name": "shamir-tss-gf256",
+  "version": "0.1.0",
+  "description": "Uses Shamir's secret sharing method to allows space-effecient secret sharing (splitting) that requires a minimum threshold of shares in order to unlock the orignal secret.",
+  "author": "Shane Holloway <shane.holloway@ieee.org>",
+  "license": "ISC",
+  "keywords": [
+    "threshold secret sharing", "secret sharing", "Shamir", "sss", "ssss",
+    "Lagrange", "Lagrange interpolate", "Lagrange interpolation", "Lagrange polynomial",
+    "finite field", "Galois Field", "Galois", "GF(2^8)", "GF256", "GF(256)"
+  ],
+
+  "main": "dist/index.js",
+  "files": ["dist/", "code/", "test/"],
+  "dependencies": {},
+  "devDependencies": {
+    "babel-cli": "^6.24.0",
+    "babel-preset-jsy": "^0.5.3",
+    "tap-lite-tester": "^0.3.9"
+  },
+  "babel": {
+    "presets": "jsy"
+  },
+  "scripts": {
+    "build": "babel -x .js,.jsy code -d dist",
+    "watch": "npm -s run build -- --watch",
+    "prepublish": "npm -s run build",
+    "pretest": "npm -s run build",
+    "test": "babel-node test/all.jsy test/test*"
+  }
+}
