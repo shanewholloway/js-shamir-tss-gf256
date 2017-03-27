@@ -50,10 +50,7 @@ export default function(Buffer, randomBytes) ::
     _randomBytes = randomBytes
 
     _packShare(threshold, x, y_vec) ::
-      let data = [threshold, x].concat(y_vec)
-      // use url-safe base64 encoding
-      return Buffer(data).toString('base64')
-        .replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'')
+      return Buffer @ [threshold, x].concat(y_vec)
 
     _unpackShare(buf) ::
       if 'string' === typeof buf ::
