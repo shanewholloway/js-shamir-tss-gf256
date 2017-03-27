@@ -42,9 +42,16 @@ exports.default = function (Buffer, randomBytes) {
       });
     }
 
-    unlock(shares) {
+    unlock(shares, valueIfUnderThreshold) {
       shares = Array.from(shares, this._unpackShare);
       const threshold = shares[0].threshold;
+      if (shares.length < threshold) {
+        if (undefined !== valueIfUnderThreshold) {
+          return valueIfUnderThreshold;
+        }
+        throw new Error('Number of shares did not meet threshold to unlock shared secret');
+      }
+
       const u = shares.slice(0, threshold).map(s => s.x);
 
       // v_vec = zip @ shares.map(s => s.y_vec)
@@ -69,6 +76,14 @@ exports.default = function (Buffer, randomBytes) {
       }
 
       return { threshold: buf[0], x: buf[1], y_vec: buf.slice(2) };
+    }
+
+    static generateShares(secret, thresholdShares, totalShares) {
+      return new ShamirThresholdSecretShare_GF256().generate(secret, thresholdShares, totalShares);
+    }
+
+    static unlockShares(shares_of_secret, valueIfUnderThreshold) {
+      return new ShamirThresholdSecretShare_GF256().unlock(shares_of_secret, valueIfUnderThreshold);
     }
   }
 

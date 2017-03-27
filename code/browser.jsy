@@ -2,13 +2,8 @@
 const Buffer = require('buffer/').Buffer
 const randomBytes = require('randombytes')
 
-export const ShamirThresholdSecretShare_GF256 = require('./tss').default(Buffer, randomBytes)
-export const ShamirSecretShare = ShamirThresholdSecretShare_GF256
-export const ShamirTSS = ShamirThresholdSecretShare_GF256
-
-export function generateShares(secret, thresholdShares, totalShares) ::
-  return new ShamirSecretShare().generate(secret, thresholdShares, totalShares)
-
-export function unlockShares(shares_of_secret) ::
-  return new ShamirSecretShare().unlock(shares_of_secret)
+export const ShamirSecretShare = require('./tss').default(Buffer, randomBytes)
+export const ShamirTSS = ShamirSecretShare
+export const generateShares = ShamirTSS.generateShares
+export const unlockShares = ShamirTSS.unlockShares
 
