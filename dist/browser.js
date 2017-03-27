@@ -6,7 +6,8 @@ Object.defineProperty(exports, "__esModule", {
 exports.generateShares = generateShares;
 exports.unlockShares = unlockShares;
 // vim: ts=2 sw=2 expandtab filetype=javascript
-const { randomBytes } = require('crypto');
+const Buffer = require('buffer/').Buffer;
+const randomBytes = require('randombytes');
 
 const ShamirThresholdSecretShare_GF256 = exports.ShamirThresholdSecretShare_GF256 = require('./tss').default(Buffer, randomBytes);
 const ShamirSecretShare = exports.ShamirSecretShare = ShamirThresholdSecretShare_GF256;
