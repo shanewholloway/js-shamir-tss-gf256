@@ -31,8 +31,8 @@ export default function(Buffer, randomBytes) ::
 
     unlock(shares, valueIfUnderThreshold) ::
       shares = Array.from @ shares, this._unpackShare
-      const threshold = shares[0].threshold
-      if shares.length < threshold ::
+      const threshold = shares[0] && shares[0].threshold
+      if !threshold || shares.length < threshold ::
         if undefined !== valueIfUnderThreshold ::
           return valueIfUnderThreshold
         throw new Error('Number of shares did not meet threshold to unlock shared secret')
