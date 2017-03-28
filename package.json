@@ -1,6 +1,6 @@
 {
   "name": "shamir-tss-gf256",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Uses Shamir's secret sharing method to allows space-effecient secret sharing (splitting) that requires a minimum threshold of shares in order to unlock the orignal secret.",
   "author": "Shane Holloway <shane.holloway@ieee.org>",
   "license": "ISC",
@@ -10,6 +10,8 @@
     "finite field", "Galois Field", "Galois", "GF(2^8)", "GF256", "GF(256)"
   ],
 
+  "homepage": "https://github.com/shanewholloway/node-shamir-tss-gf256/issues",
+  "repository": "shanewholloway/node-shamir-tss-gf256",
   "browser": "dist/browser.js",
   "main": "dist/index.js",
   "files": ["dist/", "code/", "test/"],
