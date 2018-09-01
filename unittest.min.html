@@ -1,0 +1,20 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>shamir-tss-gf256 min Mocha Tests</title>
+<link rel='stylesheet' href='https://unpkg.com/mocha@5.2.0/mocha.css' />
+
+<script crossorigin src='https://unpkg.com/mocha@5.2.0/mocha.js'></script>
+<script crossorigin src='https://unpkg.com/chai@4.1.2/chai.js'></script>
+<script src='./umd/shamir-tss-gf256.min.js'></script>
+
+<div id="mocha"></div>
+
+<script>
+  window.assert = chai.assert
+  window.require = module => window[module]
+  mocha.setup({ ui: 'bdd' })
+</script>
+<script src='./test/__unittest.iife.js'></script>
+<script>
+  mocha.run()
+</script>

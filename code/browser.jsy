@@ -1,9 +1,0 @@
-// vim: ts=2 sw=2 expandtab filetype=javascript
-const Buffer = require('buffer/').Buffer
-const randomBytes = require('randombytes')
-
-export const ShamirSecretShare = require('./tss').default(Buffer, randomBytes)
-export const ShamirTSS = ShamirSecretShare
-export const generateShares = ShamirTSS.generateShares
-export const unlockShares = ShamirTSS.unlockShares
-

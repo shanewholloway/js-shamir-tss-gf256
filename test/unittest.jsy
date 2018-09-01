@@ -1,0 +1,4 @@
+(require('source-map-support') || {install(){}}).install()
+
+import './test_gf256_math.jsy'
+import './test_shamir_sharing.jsy'

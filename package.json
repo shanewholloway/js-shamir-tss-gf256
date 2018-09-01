@@ -1,34 +1,55 @@
 {
   "name": "shamir-tss-gf256",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "Uses Shamir's secret sharing method to allows space-effecient secret sharing (splitting) that requires a minimum threshold of shares in order to unlock the orignal secret.",
   "author": "Shane Holloway <shane.holloway@ieee.org>",
   "license": "BSD-2-Clause",
   "keywords": [
-    "threshold secret sharing", "secret sharing", "Shamir", "sss", "ssss",
-    "Lagrange", "Lagrange interpolate", "Lagrange interpolation", "Lagrange polynomial",
-    "finite field", "Galois Field", "Galois", "GF(2^8)", "GF256", "GF(256)"
+    "threshold secret sharing",
+    "secret sharing",
+    "Shamir",
+    "sss",
+    "ssss",
+    "Lagrange",
+    "Lagrange interpolate",
+    "Lagrange interpolation",
+    "Lagrange polynomial",
+    "finite field",
+    "Galois Field",
+    "Galois",
+    "GF(2^8)",
+    "GF256",
+    "GF(256)"
   ],
-
   "homepage": "https://github.com/shanewholloway/node-shamir-tss-gf256/issues",
   "repository": "shanewholloway/node-shamir-tss-gf256",
-  "browser": "dist/browser.js",
-  "main": "dist/index.js",
-  "files": ["dist/", "code/", "test/"],
+  "main": "cjs/index.js",
+  "module": "esm/index.js",
+  "browser": "umd/shamir-tss-gf256.min.js",
+  "files": [
+    "cjs/",
+    "esm/",
+    "umd/",
+    "code/"
+  ],
   "dependencies": {},
   "devDependencies": {
-    "babel-cli": "^6.24.0",
-    "babel-preset-jsy": "^0.6.1",
-    "tap-lite-tester": "^0.3.9"
-  },
-  "babel": {
-    "presets": "jsy"
+    "chai": "^4.1.2",
+    "jsy-transpile": "^0.2.5",
+    "mocha": "^5.2.0",
+    "rollup": "^0.65.0",
+    "rollup-plugin-jsy-lite": "^1.2.1",
+    "rollup-plugin-node-resolve": "^3.3.0",
+    "rollup-plugin-terser": "^2.0.2",
+    "shamir-tss-gf256": "file:."
   },
   "scripts": {
-    "build": "babel -s inline -x .js,.jsy code -d dist",
+    "clean": "rm -rf ./cjs/* ./esm/* ./umd/*",
+    "build": "rollup --config",
     "watch": "npm -s run build -- --watch",
-    "prepublish": "npm -s run build",
     "pretest": "npm -s run build",
-    "test": "babel-node test/all.jsy test/test*"
+    "test": "npm -s run test:one",
+    "test:one": "mocha ./test/__unittest.cjs.js",
+    "test:min": "mocha --reporter=min ./test/__unittest.cjs.js"
   }
 }

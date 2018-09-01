@@ -1,44 +1,51 @@
-require('source-map-support').install()
-const tap = require('tap-lite-tester')
-const {randomBytes} = require('crypto')
-const {generateShares, unlockShares} = require('../dist')
+const assert = require('assert')
 
-tap.start()
+const { generateShares, unlockShares } = require('shamir-tss-gf256')
 
-::
+import * as util_nodejs from 'shamir-tss-gf256/esm/utils.nodejs.js'
+import * as util_browser from 'shamir-tss-gf256/esm/utils.web.js'
+const browser = 'undefined' !== typeof window
+const { randomBytes, u8_to_base64, base64_to_u8 } = browser ? util_browser : util_nodejs
+
+describe @ 'Shamir Sharing', @=> ::
+
+  it @ `known secret threshold: 2 total: 4`, @=> ::
+    const known_secret = base64_to_u8 @ '/Vyb7AZeqh0Hx7tPw3Jy8yHbr2Zr00RtkiW3X9UGmZTsbh2VNajR/zOEpNd/U/X7y+BpIIr7w64x+YmMooBg2g=='
+
+    const shares =
+      @[] 'AgFA2MLGSIKPAXdcZpyyOWxxmt-3CJjtLSGcWQSUv3WFNHj9_2AJvJh7brZ8TEyHiIcf5MshdX1lHnPN2q8y0ox9'
+        , 'AgKcTym4mv3gJefqGvIh5E7sTNOfupavlvWO3crSAeChz99TwmRNgEPsieAP-hngDwN46DYib-yU1bWRL8qZJKOP'
+        , 'AgMhy3CS1CHFOZdxxyFQr1Bu99eH1GWR_7mAoXkZa5O9b0vAIJFxlApo1NLXYSo0cn-s7JQjkGoyZfelfOkJdk8o'
+        , 'AgQ_euREJQM-bdyd4i4cRQrN-8vPxYor-0aqzk1eZtHpIooUuGzF-O7ZXEzpjbMuGhC28NckW9VtWCIp3gDU0_1w'
+
+    const known_secret_b64 = u8_to_base64 @ known_secret
+
+    assert.equal @ known_secret_b64, u8_to_base64 @ unlockShares @# shares[0], shares[1]
+    assert.equal @ known_secret_b64, u8_to_base64 @ unlockShares @# shares[0], shares[2]
+    assert.equal @ known_secret_b64, u8_to_base64 @ unlockShares @# shares[0], shares[3]
+    assert.equal @ known_secret_b64, u8_to_base64 @ unlockShares @# shares[1], shares[2]
+    assert.equal @ known_secret_b64, u8_to_base64 @ unlockShares @# shares[1], shares[3]
+    assert.equal @ known_secret_b64, u8_to_base64 @ unlockShares @# shares[2], shares[3]
+
+    assert.equal @ known_secret_b64, u8_to_base64 @ unlockShares @# shares[0], shares[1], shares[2]
+    assert.equal @ known_secret_b64, u8_to_base64 @ unlockShares @# shares[0], shares[1], shares[3]
+    assert.equal @ known_secret_b64, u8_to_base64 @ unlockShares @# shares[0], shares[2], shares[3]
+    assert.equal @ known_secret_b64, u8_to_base64 @ unlockShares @# shares[1], shares[2], shares[3]
+
+    assert.equal @ known_secret_b64, u8_to_base64 @ unlockShares @# shares[0], shares[1], shares[2], shares[3]
+
+
   for let threshold=1; threshold<=16; threshold*=2 ::
-    for let additional=0; additional<=4; additional+=2 ::
-      const total = threshold + additional
+    describe @ `threshold ${threshold}`, @=> ::
+      for let additional=0; additional<=4; additional+=2 ::
+        const total = threshold + additional
 
-      tap.test @ `round trip threshold: ${threshold} total: ${total}`, t => ::
-        const secret = randomBytes(64)
-        const shares = generateShares(secret, threshold, total)
-        const secret_rt = unlockShares(shares)
-        if 0 ::
-          console.dir @ shares
-        t.equal @ 0, Buffer.compare(secret, secret_rt)
+        it @ `round trip threshold: ${threshold} total: ${total}`, @=> ::
+          const secret = randomBytes(64)
+          const shares = generateShares(secret, threshold, total)
+          const secret_rt = unlockShares(shares)
+          if 0 ::
+            console.dir @ shares
+          assert.equal @ u8_to_base64(secret), u8_to_base64(secret_rt)
 
 
-const known_secret = Buffer.from @ '/Vyb7AZeqh0Hx7tPw3Jy8yHbr2Zr00RtkiW3X9UGmZTsbh2VNajR/zOEpNd/U/X7y+BpIIr7w64x+YmMooBg2g==', 'base64'
-tap.test @ `known secret threshold: 2 total: 4`, t => ::
-  const shares =
-    @[] 'AgFA2MLGSIKPAXdcZpyyOWxxmt-3CJjtLSGcWQSUv3WFNHj9_2AJvJh7brZ8TEyHiIcf5MshdX1lHnPN2q8y0ox9'
-      , 'AgKcTym4mv3gJefqGvIh5E7sTNOfupavlvWO3crSAeChz99TwmRNgEPsieAP-hngDwN46DYib-yU1bWRL8qZJKOP'
-      , 'AgMhy3CS1CHFOZdxxyFQr1Bu99eH1GWR_7mAoXkZa5O9b0vAIJFxlApo1NLXYSo0cn-s7JQjkGoyZfelfOkJdk8o'
-      , 'AgQ_euREJQM-bdyd4i4cRQrN-8vPxYor-0aqzk1eZtHpIooUuGzF-O7ZXEzpjbMuGhC28NckW9VtWCIp3gDU0_1w'
-
-  t.equal @ 0, Buffer.compare @ known_secret, unlockShares @ @[] shares[0], shares[1]
-  t.equal @ 0, Buffer.compare @ known_secret, unlockShares @ @[] shares[0], shares[2]
-  t.equal @ 0, Buffer.compare @ known_secret, unlockShares @ @[] shares[0], shares[3]
-  t.equal @ 0, Buffer.compare @ known_secret, unlockShares @ @[] shares[1], shares[2]
-  t.equal @ 0, Buffer.compare @ known_secret, unlockShares @ @[] shares[1], shares[3]
-  t.equal @ 0, Buffer.compare @ known_secret, unlockShares @ @[] shares[2], shares[3]
-
-  t.equal @ 0, Buffer.compare @ known_secret, unlockShares @ @[] shares[0], shares[1], shares[2]
-  t.equal @ 0, Buffer.compare @ known_secret, unlockShares @ @[] shares[0], shares[1], shares[3]
-  t.equal @ 0, Buffer.compare @ known_secret, unlockShares @ @[] shares[0], shares[2], shares[3]
-  t.equal @ 0, Buffer.compare @ known_secret, unlockShares @ @[] shares[1], shares[2], shares[3]
-
-  t.equal @ 0, Buffer.compare @ known_secret, unlockShares @ @[] shares[0], shares[1], shares[2], shares[3]
-
-tap.finish()

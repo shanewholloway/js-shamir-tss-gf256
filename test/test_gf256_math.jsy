@@ -1,77 +1,74 @@
-require('source-map-support').install()
-const tap = require('tap-lite-tester')
-const {mul, div, compute_poly, lagrange_basis_poly_at_zero, lagrange_interpolate} = require('../dist/gf256_math')
+const assert = require('assert')
+import {mul, div, compute_poly, lagrange_basis_poly_at_zero, lagrange_interpolate} from 'shamir-tss-gf256/esm/gf256'
 
-tap.start()
+describe @ 'Galois Field 256 (2**8) math', @=> ::
 
-tap.test @ 'a === (a+b) - b', t => ::
-  for let a=0; a<256; a++ ::
-    for let b=0; b<256; b++ ::
-      const a_add_b = a ^ b
-      t.equal @ a, a_add_b ^ b, `given a:${a} b:${b}`
+  it @ 'a === (a+b) - b', @=> ::
+    for let a=0; a<256; a++ ::
+      for let b=0; b<256; b++ ::
+        const a_add_b = a ^ b
+        assert.equal @ a, a_add_b ^ b, `given a:${a} b:${b}`
 
-tap.test @ 'b === (a+b) - a', t => ::
-  for let a=0; a<256; a++ ::
-    for let b=0; b<256; b++ ::
-      const a_add_b = a ^ b
-      t.equal @ b, a_add_b ^ a, `given a:${a} b:${b}`
+  it @ 'b === (a+b) - a', @=> ::
+    for let a=0; a<256; a++ ::
+      for let b=0; b<256; b++ ::
+        const a_add_b = a ^ b
+        assert.equal @ b, a_add_b ^ a, `given a:${a} b:${b}`
 
-tap.test @ '0 === (a*0)', t => ::
-  for let a=0; a<256; a++ ::
-    t.equal @ 0, mul(a, 0)
+  it @ '0 === (a*0)', @=> ::
+    for let a=0; a<256; a++ ::
+      assert.equal @ 0, mul(a, 0)
 
-tap.test @ '0 === (0*a)', t => ::
-  for let a=0; a<256; a++ ::
-    t.equal @ 0, mul(0, a)
+  it @ '0 === (0*a)', @=> ::
+    for let a=0; a<256; a++ ::
+      assert.equal @ 0, mul(0, a)
 
-tap.test @ '0 === (0/a)', t => ::
-  for let a=0; a<256; a++ ::
-    t.equal @ 0, div(0, a)
+  it @ '0 === (0/a)', @=> ::
+    for let a=0; a<256; a++ ::
+      assert.equal @ 0, div(0, a)
 
-tap.test @ 'a === (a*b) / b', t => ::
-  for let a=1; a<256; a++ ::
-    for let b=1; b<256; b++ ::
-      const ab = mul(a, b)
-      t.equal @ a, div(ab, b), `given a:${a} b:${b}`
+  it @ 'a === (a*b) / b', @=> ::
+    for let a=1; a<256; a++ ::
+      for let b=1; b<256; b++ ::
+        const ab = mul(a, b)
+        assert.equal @ a, div(ab, b), `given a:${a} b:${b}`
 
-tap.test @ 'b === (a*b) / a', t => ::
-  for let a=1; a<256; a++ ::
-    for let b=1; b<256; b++ ::
-      const ab = mul(a, b)
-      t.equal @ b, div(ab, a), `given a:${a} b:${b}`
+  it @ 'b === (a*b) / a', @=> ::
+    for let a=1; a<256; a++ ::
+      for let b=1; b<256; b++ ::
+        const ab = mul(a, b)
+        assert.equal @ b, div(ab, a), `given a:${a} b:${b}`
 
-tap.test @ 'a === (a/b) * b', t => ::
-  for let a=1; a<256; a++ ::
-    for let b=1; b<256; b++ ::
-      const a_div_b = div(a, b)
-      t.equal @ a, mul(a_div_b, b), `given a:${a} b:${b}`
+  it @ 'a === (a/b) * b', @=> ::
+    for let a=1; a<256; a++ ::
+      for let b=1; b<256; b++ ::
+        const a_div_b = div(a, b)
+        assert.equal @ a, mul(a_div_b, b), `given a:${a} b:${b}`
 
-tap.test @ 'b === (b/a) * a', t => ::
-  for let a=1; a<256; a++ ::
-    for let b=1; b<256; b++ ::
-      const b_div_a = div(b, a)
-      t.equal @ b, mul(b_div_a, a), `given a:${a} b:${b}`
-
-
-tap.test @ 'a specific lagrange basis interpolation', t => ::
-  const secret_byte = 174
-  const poly_coeff = @[] secret_byte, 22, 245, 132
-  const M = poly_coeff.length
-  const K = 2
-
-  let r = []
-  for let x=1; x <= M+K; x++ ::
-    r.push @ {x, y: compute_poly(x, poly_coeff)}
-
-  const u = r.slice(0,M).map @ s => s.x
-  const basis_polys = lagrange_basis_poly_at_zero(u)
-
-  const v = r.map @ s => s.y
-  let sum = 0
-  for let i = 0; i<M; i++ ::
-    sum ^= mul(basis_polys[i], v[i])
-
-  t.equal @ secret_byte, sum
+  it @ 'b === (b/a) * a', @=> ::
+    for let a=1; a<256; a++ ::
+      for let b=1; b<256; b++ ::
+        const b_div_a = div(b, a)
+        assert.equal @ b, mul(b_div_a, a), `given a:${a} b:${b}`
 
 
-tap.finish()
+  it @ 'a specific lagrange basis interpolation', @=> ::
+    const secret_byte = 174
+    const poly_coeff = @[] secret_byte, 22, 245, 132
+    const M = poly_coeff.length
+    const K = 2
+
+    let r = []
+    for let x=1; x <= M+K; x++ ::
+      r.push @ {x, y: compute_poly(x, poly_coeff)}
+
+    const u = r.slice(0,M).map @ s => s.x
+    const basis_polys = lagrange_basis_poly_at_zero(u)
+
+    const v = r.map @ s => s.y
+    let sum = 0
+    for let i = 0; i<M; i++ ::
+      sum ^= mul(basis_polys[i], v[i])
+
+    assert.equal @ secret_byte, sum
+

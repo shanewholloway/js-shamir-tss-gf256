@@ -1,5 +1,3 @@
-// vim: ts=2 sw=2 expandtab filetype=javascript
-
 /* Galois Field 256 (2**8) math primitives.
  * 
  * Octect-based Shamir Secret Sharing patterned after IETF informational draft

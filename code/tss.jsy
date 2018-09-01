@@ -1,11 +1,13 @@
-// vim: ts=2 sw=2 expandtab filetype=javascript
-const {compute_poly, lagrange_interpolate} = require('./gf256_math')
+import {compute_poly, lagrange_interpolate} from './gf256.jsy'
 
-export default function(Buffer, randomBytes) ::
+export default function({ isBinarySecret, randomBytes, u8_to_base64, base64_to_u8 }) ::
+  if ! randomBytes ::
+    debugger
+    return {}
 
   class ShamirThresholdSecretShare_GF256 ::
     generate(secret, thresholdShares, totalShares) ::
-      if !Buffer.isBuffer(secret) ::
+      if ! isBinarySecret(secret) ::
         throw new Error @ "Expected secret to be a buffer"
 
       if thresholdShares <= 0 ::
@@ -45,18 +47,16 @@ export default function(Buffer, randomBytes) ::
 
       // Lagrange interpolation integrates the split share into the original secret
       const secret_octects = lagrange_interpolate(u, v_vec)
-      return Buffer @ Array.from @ secret_octects
-
-    _randomBytes = randomBytes
+      return Uint8Array.from @ secret_octects
 
     _packShare(threshold, x, y_vec) ::
-      return Buffer @ [threshold, x].concat(y_vec)
+      return Uint8Array.from @ [threshold, x].concat(y_vec)
 
     _unpackShare(buf) ::
       if 'string' === typeof buf ::
-        buf = Buffer.from(buf, 'base64')
-      else if !Buffer.isBuffer(buf) ::
-        throw new Error("Share must be a buffer or a string")
+        buf = base64_to_u8(buf, 'base64')
+      else if ! isBinarySecret(buf) ::
+        throw new Error("Share must be a Uint8Array, Buffer, or a string")
 
       return @{} threshold: buf[0], x: buf[1], y_vec: buf.slice(2)
 
@@ -69,4 +69,8 @@ export default function(Buffer, randomBytes) ::
         .unlock(shares_of_secret, valueIfUnderThreshold)
 
 
-  return ShamirThresholdSecretShare_GF256
+  const ShamirTSS = ShamirThresholdSecretShare_GF256
+  ShamirTSS.ShamirSecretShare = ShamirTSS.ShamirTSS = ShamirTSS
+  ShamirTSS.prototype._randomBytes = randomBytes
+
+  return ShamirTSS

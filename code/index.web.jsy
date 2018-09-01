@@ -1,0 +1,13 @@
+import bind_shamirSecretShare from './tss.jsy'
+import { randomBytes, u8_to_base64, base64_to_u8 } from './utils.web.jsy'
+
+function isBinarySecret(arg) ::
+  return arg instanceof Uint8Array
+
+export const ShamirSecretShare = bind_shamirSecretShare @:
+  isBinarySecret, randomBytes, u8_to_base64, base64_to_u8
+export default ShamirSecretShare
+
+export const ShamirTSS = ShamirSecretShare
+export const generateShares = ShamirSecretShare.generateShares
+export const unlockShares = ShamirSecretShare.unlockShares

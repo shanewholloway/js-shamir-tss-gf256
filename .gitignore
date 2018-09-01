@@ -1,1 +1,6 @@
+cjs/
+esm/
+umd/
+dist/
+test/__*
 
