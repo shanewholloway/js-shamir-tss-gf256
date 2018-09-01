@@ -21,8 +21,14 @@
     "GF256",
     "GF(256)"
   ],
-  "homepage": "https://github.com/shanewholloway/node-shamir-tss-gf256/issues",
-  "repository": "shanewholloway/node-shamir-tss-gf256",
+  "homepage": "https://github.com/shanewholloway/js-shamir-tss-gf256#readme",
+  "bugs": {
+    "url": "https://github.com/shanewholloway/js-shamir-tss-gf256/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/shanewholloway/js-shamir-tss-gf256.git"
+  },
   "main": "cjs/index.js",
   "module": "esm/index.js",
   "browser": "umd/shamir-tss-gf256.min.js",
