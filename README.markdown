@@ -38,7 +38,7 @@ const res_under_a = shamir_tss.unlockShares([shares[2], shares[7]], false)
 try {
   const res_under = shamir_tss.unlockShares([shares[2], shares[7]])
 } catch (err) {
-  // Number of shares did not meet threshold to unlock shared secret
+  // Number of shares did not meet threshold to unlock shared secret. (2 of 3, 0 duplicates)
 }
 
 

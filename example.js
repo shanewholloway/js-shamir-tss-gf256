@@ -23,12 +23,12 @@ console.log(res_under_fallback) // false
 try {
   const res_under = shamir_tss.unlockShares([shares[2], shares[7]])
 } catch (err) {
-  console.error(err.message) // Number of shares did not meet threshold to unlock shared secret
+  console.error(err.message) // Number of shares did not meet threshold to unlock shared secret. (2 of 3, 0 duplicates)
 }
 
 const res_min = shamir_tss.unlockShares([shares[2], shares[7], shares[4]])
-console.log({res_min}) // { res_min: Uint8Array [ 127, 235, 91, 105, 228, 244, 250, 2, 47, 3, 148, 46, 52, 56, 56, 137 ] }
+console.log(res_min) // Uint8Array [ 127, 235, 91, 105, 228, 244, 250, 2, 47, 3, 148, 46, 52, 56, 56, 137 ]
 
 const res_over = shamir_tss.unlockShares([shares[2], shares[7], shares[4], shares[9], shares[1]])
-console.log({res_over}) // { res_over: Uint8Array [ 127, 235, 91, 105, 228, 244, 250, 2, 47, 3, 148, 46, 52, 56, 56, 137 ] }
+console.log(res_over) // Uint8Array [ 127, 235, 91, 105, 228, 244, 250, 2, 47, 3, 148, 46, 52, 56, 56, 137 ]
 

@@ -1,6 +1,6 @@
 {
   "name": "shamir-tss-gf256",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Uses Shamir's secret sharing method to allows space-effecient secret sharing (splitting) that requires a minimum threshold of shares in order to unlock the orignal secret.",
   "author": "Shane Holloway <shane.holloway@ieee.org>",
   "license": "BSD-2-Clause",

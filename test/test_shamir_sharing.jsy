@@ -20,6 +20,18 @@ describe @ 'Shamir Sharing', @=> ::
 
     const known_secret_b64 = u8_to_base64 @ known_secret
 
+    // test insuffecient shares
+    assert.equal @ false, unlockShares @ [shares[3]], false
+    assert.throws @
+      () => unlockShares @# shares[3]
+      '(1 of 2, 0 duplicates)'
+
+    // test duplicate shares
+    assert.equal @ false, unlockShares @ [shares[2], shares[2]], false
+    assert.throws @
+      () => unlockShares @# shares[2], shares[2]
+      '(1 of 2, 1 duplicates)'
+
     assert.equal @ known_secret_b64, u8_to_base64 @ unlockShares @# shares[0], shares[1]
     assert.equal @ known_secret_b64, u8_to_base64 @ unlockShares @# shares[0], shares[2]
     assert.equal @ known_secret_b64, u8_to_base64 @ unlockShares @# shares[0], shares[3]

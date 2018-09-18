@@ -1,4 +1,7 @@
-export const {randomBytes} = require('crypto')
+const {randomBytes: _randomBytes} = require('crypto')
+
+export function randomBytes(count) ::
+  return Uint8Array.from @ _randomBytes(count)
 
 export function u8_to_base64(u8) ::
   return Buffer.from(u8).toString('base64')

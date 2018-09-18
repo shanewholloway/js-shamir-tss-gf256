@@ -44,10 +44,11 @@ export default function({ isBinarySecret, randomBytes, u8_to_base64, base64_to_u
     unlock(shares, valueIfUnderThreshold) ::
       shares = Array.from @ shares, this._unpackShare
       const threshold = shares[0] && shares[0].threshold
-      if !threshold || shares.length < threshold ::
+      const unique_x = new Set @ shares.map @ s => s.x
+      if ! threshold || unique_x.size < threshold ::
         if undefined !== valueIfUnderThreshold ::
           return valueIfUnderThreshold
-        throw new Error('Number of shares did not meet threshold to unlock shared secret')
+        throw new Error(`Number of shares did not meet threshold to unlock shared secret. (${unique_x.size} of ${threshold}, ${shares.length - unique_x.size} duplicates) `)
 
       const u = shares.slice(0, threshold).map @ s => s.x
 
