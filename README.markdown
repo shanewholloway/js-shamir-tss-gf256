@@ -13,7 +13,7 @@ original secret.
 ```javascript
 import * as shamir_tss from 'shamir-tss-gf256'
 // or const shamir_tss = require('shamir-tss-gf256')
-// or <script src='https://unpkg.com/shamir-tss-gf256@0.3.2/umd/shamir-tss-gf256.min.js' ></script>
+// or <script src='https://unpkg.com/shamir-tss-gf256@0.4.0/umd/shamir-tss-gf256.min.js' ></script>
 
 const secret = shamir_tss.randomBytes(16) // or any Uint8Array/Buffer
 
@@ -64,7 +64,11 @@ unique subset of `thresholdShare` shares will unlock the original `secret`.
 Returns the `shares` as array of `Uint8Array`.
 
 
-#### `unlockShares(shares, valueIfUnderThreshold)`
+#### `generatorShares(secret, thresholdShares, [totalShares])`
+`generateShares()` returning an iterator of `Uint8Array` `shares`.
+
+
+#### `unlockShares(shares, [valueIfUnderThreshold])`
 Computes and returns the `secret` using provided `shares` array, given
 sufficient number of shares. Otherwise, `valueIfUnderThreshold` is returned.
 
@@ -75,26 +79,29 @@ in unlocking some undefined "secret".
 
 
 #### `generateShares_b64(secret, thresholdShares, totalShares)`
-`generateShares()` with results Base64 encoded.
+`generateShares()` returning an array of Base64 encoded `shares`.
 
-#### `unlockShares_b64()`
+#### `generatorShares_b64(secret, thresholdShares, [totalShares])`
+`generateShares()` returning an iterator of Base64 encoded `shares`.
+
+#### `unlockShares_b64(shares, [valueIfUnderThreshold])`
 `unlockShares()` with result Base64 encoded.
 
 
 ### Utilities
 
-#### `function isBinarySecret(arg)`
+#### `isBinarySecret(arg)`
 True if `arg` is a `Buffer` or `Uint8Array`, false otherwise.
 
-#### `function randomBytes(n_bytes)`
+#### `randomBytes(n_bytes)`
 In Browser environments, generates a `Uint8Array` of specified byte length using `crypto.getRandomValues()`.
 
 In NodeJS, generates a `Uint8Array` of specified byte length using `crypto.randomBytes()`.
 
-#### `function u8_to_base64(u8)`
+#### `u8_to_base64(u8)`
 Converts a `Uint8Array` or `Buffer` to a Base64 (URL safe) encoded string.
 
-#### `function base64_to_u8(string_b64)`
+#### `base64_to_u8(string_b64)`
 Converts a Base64 encoded string to a `Uint8Array` or `Buffer`.
 
 
@@ -119,7 +126,7 @@ To use:
 ```javascript
 const gf256 = require('shamir-tss-gf256/cjs/gf256')
 // or import * as gf256 from 'shamir-tss-gf256/esm/gf256'
-// or <script src='https://unpkg.com/shamir-tss-gf256@0.3.2/umd/gf256.js' ></script>
+// or <script src='https://unpkg.com/shamir-tss-gf256@0.4.0/umd/gf256.js' ></script>
 ```
 
 

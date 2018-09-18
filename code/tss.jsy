@@ -3,29 +3,43 @@ import {compute_poly, lagrange_interpolate} from './gf256.jsy'
 export default function({ isBinarySecret, randomBytes, u8_to_base64, base64_to_u8 }) ::
 
   const ShamirTSS = class ShamirThresholdSecretShare_GF256 ::
+
     generate(secret, thresholdShares, totalShares) ::
+      if ! totalShares || totalShares < thresholdShares || ! Number.isInteger(totalShares) ::
+        throw new Error @ "Expected the total count to be greater than the threshold count"
+
+      return Array.from @
+        this.generator(secret, thresholdShares, totalShares)
+
+    generator(secret, thresholdShares, totalShares) ::
       if ! isBinarySecret(secret) ::
         throw new Error @ "Expected secret to be a buffer"
 
       if thresholdShares <= 0 ::
         throw new Error @ "Expected a positive threshold count"
 
-      if null == totalShares ::
-        totalShares = thresholdShares
-      else if totalShares < thresholdShares ::
-        throw new Error @ "Expected the total count to be greater than the threshold count"
+      totalShares |= 0 // force to integer
 
       // initialize random Galois Field polynomials using provided
       // octects of secret for a0 coefficients
       const gf_polys = Array.from @ secret, a0_secret => ::
-        let poly = this.randomBytes(thresholdShares)
+        let poly = randomBytes(thresholdShares)
         poly[0] = a0_secret // use specified a0 as secret
         return poly
 
-      // compute the shares given the Galois Field polynomials
-      return new Array(totalShares).fill(null).map @ (_, i) => ::
-        const x=1+i, y_vec=gf_polys.map @ poly => compute_poly(x, poly)
-        return this._packShare(thresholdShares, x, y_vec)
+      let count=0
+      return @{}
+        [Symbol.iterator]() :: return this
+        _packShare: this._packShare
+
+        next() ::
+          // compute the shares given the Galois Field polynomials
+          const x = ++count
+          const y_vec = gf_polys.map @ poly => compute_poly(x, poly)
+          const value = this._packShare(thresholdShares, x, y_vec)
+          const done = totalShares ? totalShares < count : false
+          return { value, done }
+
 
     unlock(shares, valueIfUnderThreshold) ::
       shares = Array.from @ shares, this._unpackShare
@@ -46,8 +60,16 @@ export default function({ isBinarySecret, randomBytes, u8_to_base64, base64_to_u
 
 
     generate_b64(secret, thresholdShares, totalShares) ::
-      const res = this.generate(secret, thresholdShares, totalShares)
-      return res.map @ s => u8_to_base64(s)
+      if ! totalShares || totalShares < thresholdShares || ! Number.isInteger(totalShares) ::
+        throw new Error @ "Expected the total count to be greater than the threshold count"
+
+      return Array.from @
+        this.generator_b64(secret, thresholdShares, totalShares)
+
+    generator_b64(secret, thresholdShares, totalShares) ::
+      const iter = this.generator(secret, thresholdShares, totalShares)
+      iter._packShare = this._packShare_b64
+      return iter
 
     unlock_b64(shares, valueIfUnderThreshold) ::
       let res = this.unlock(shares, valueIfUnderThreshold)
@@ -58,6 +80,9 @@ export default function({ isBinarySecret, randomBytes, u8_to_base64, base64_to_u
     _packShare(threshold, x, y_vec) ::
       return Uint8Array.from @ [threshold, x].concat(y_vec)
 
+    _packShare_b64(threshold, x, y_vec) ::
+      return u8_to_base64 @ Uint8Array.from @ [threshold, x].concat(y_vec)
+
     _unpackShare(buf) ::
       if 'string' === typeof buf ::
         buf = base64_to_u8(buf, 'base64')
@@ -65,18 +90,6 @@ export default function({ isBinarySecret, randomBytes, u8_to_base64, base64_to_u
         throw new Error("Share must be a Uint8Array, Buffer, or a string")
 
       return @{} threshold: buf[0], x: buf[1], y_vec: buf.slice(2)
-
-    static generateShares(secret, thresholdShares, totalShares) ::
-      return new ShamirTSS().generate(secret, thresholdShares, totalShares)
-
-    static unlockShares(shares_of_secret, valueIfUnderThreshold) ::
-      return new ShamirTSS().unlock(shares_of_secret, valueIfUnderThreshold)
-
-    static generateShares_b64(secret, thresholdShares, totalShares) ::
-      return new ShamirTSS().generate_b64(secret, thresholdShares, totalShares)
-
-    static unlockShares_b64(shares_of_secret, valueIfUnderThreshold) ::
-      return new ShamirTSS().unlock_b64(shares_of_secret, valueIfUnderThreshold)
 
 
   Object.assign @ ShamirTSS.prototype, @{}

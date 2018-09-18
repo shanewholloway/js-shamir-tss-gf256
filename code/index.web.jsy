@@ -7,11 +7,20 @@ function isBinarySecret(arg) ::
 export const ShamirSecretShare = bind_shamirSecretShare @:
   isBinarySecret, randomBytes, u8_to_base64, base64_to_u8
 export default ShamirSecretShare
-
 export const ShamirTSS = ShamirSecretShare
-export const generateShares = ShamirSecretShare.generateShares
-export const unlockShares = ShamirSecretShare.unlockShares
-export const generateShares_b64 = ShamirSecretShare.generateShares_b64
-export const unlockShares_b64 = ShamirSecretShare.unlockShares_b64
+
+export function generateShares(secret, thresholdShares, totalShares) ::
+  return new ShamirSecretShare().generate(secret, thresholdShares, totalShares)
+export function generatorShares(secret, thresholdShares, totalShares) ::
+  return new ShamirSecretShare().generatorShares(secret, thresholdShares, totalShares)
+export function unlockShares(shares_of_secret, valueIfUnderThreshold) ::
+  return new ShamirSecretShare().unlock(shares_of_secret, valueIfUnderThreshold)
+
+export function generateShares_b64(secret, thresholdShares, totalShares) ::
+  return new ShamirSecretShare().generateShares_b64(secret, thresholdShares, totalShares)
+export function generatorShares_b64(secret, thresholdShares, totalShares) ::
+  return new ShamirSecretShare().generatorShares_b64(secret, thresholdShares, totalShares)
+export function unlockShares_b64(shares_of_secret, valueIfUnderThreshold) ::
+  return new ShamirSecretShare().unlock_b64(shares_of_secret, valueIfUnderThreshold)
 
 export @{} isBinarySecret, randomBytes, u8_to_base64, base64_to_u8
