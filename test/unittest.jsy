@@ -2,3 +2,4 @@
 
 import './test_gf256_math.jsy'
 import './test_shamir_sharing.jsy'
+import './test_shamir_b64_sharing.jsy'

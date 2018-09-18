@@ -1,11 +1,8 @@
 import {compute_poly, lagrange_interpolate} from './gf256.jsy'
 
 export default function({ isBinarySecret, randomBytes, u8_to_base64, base64_to_u8 }) ::
-  if ! randomBytes ::
-    debugger
-    return {}
 
-  class ShamirThresholdSecretShare_GF256 ::
+  const ShamirTSS = class ShamirThresholdSecretShare_GF256 ::
     generate(secret, thresholdShares, totalShares) ::
       if ! isBinarySecret(secret) ::
         throw new Error @ "Expected secret to be a buffer"
@@ -21,7 +18,7 @@ export default function({ isBinarySecret, randomBytes, u8_to_base64, base64_to_u
       // initialize random Galois Field polynomials using provided
       // octects of secret for a0 coefficients
       const gf_polys = Array.from @ secret, a0_secret => ::
-        let poly = this._randomBytes(thresholdShares)
+        let poly = this.randomBytes(thresholdShares)
         poly[0] = a0_secret // use specified a0 as secret
         return poly
 
@@ -29,7 +26,6 @@ export default function({ isBinarySecret, randomBytes, u8_to_base64, base64_to_u
       return new Array(totalShares).fill(null).map @ (_, i) => ::
         const x=1+i, y_vec=gf_polys.map @ poly => compute_poly(x, poly)
         return this._packShare(thresholdShares, x, y_vec)
-
 
     unlock(shares, valueIfUnderThreshold) ::
       shares = Array.from @ shares, this._unpackShare
@@ -41,13 +37,23 @@ export default function({ isBinarySecret, randomBytes, u8_to_base64, base64_to_u
 
       const u = shares.slice(0, threshold).map @ s => s.x
 
-      // v_vec = zip @ shares.map(s => s.y_vec)
       const v_vec = Array.from @ shares[0].y_vec, (_, i) =>
         shares.map @ s => s.y_vec[i]
 
       // Lagrange interpolation integrates the split share into the original secret
       const secret_octects = lagrange_interpolate(u, v_vec)
       return Uint8Array.from @ secret_octects
+
+
+    generate_b64(secret, thresholdShares, totalShares) ::
+      const res = this.generate(secret, thresholdShares, totalShares)
+      return res.map @ s => u8_to_base64(s)
+
+    unlock_b64(shares, valueIfUnderThreshold) ::
+      let res = this.unlock(shares, valueIfUnderThreshold)
+      return res === valueIfUnderThreshold
+        ? res : u8_to_base64(res)
+
 
     _packShare(threshold, x, y_vec) ::
       return Uint8Array.from @ [threshold, x].concat(y_vec)
@@ -61,16 +67,18 @@ export default function({ isBinarySecret, randomBytes, u8_to_base64, base64_to_u
       return @{} threshold: buf[0], x: buf[1], y_vec: buf.slice(2)
 
     static generateShares(secret, thresholdShares, totalShares) ::
-      return new ShamirThresholdSecretShare_GF256()
-        .generate(secret, thresholdShares, totalShares)
+      return new ShamirTSS().generate(secret, thresholdShares, totalShares)
 
     static unlockShares(shares_of_secret, valueIfUnderThreshold) ::
-      return new ShamirThresholdSecretShare_GF256()
-        .unlock(shares_of_secret, valueIfUnderThreshold)
+      return new ShamirTSS().unlock(shares_of_secret, valueIfUnderThreshold)
+
+    static generateShares_b64(secret, thresholdShares, totalShares) ::
+      return new ShamirTSS().generate_b64(secret, thresholdShares, totalShares)
+
+    static unlockShares_b64(shares_of_secret, valueIfUnderThreshold) ::
+      return new ShamirTSS().unlock_b64(shares_of_secret, valueIfUnderThreshold)
 
 
-  const ShamirTSS = ShamirThresholdSecretShare_GF256
-  ShamirTSS.ShamirSecretShare = ShamirTSS.ShamirTSS = ShamirTSS
-  ShamirTSS.prototype._randomBytes = randomBytes
-
+  Object.assign @ ShamirTSS.prototype, @{}
+    randomBytes, u8_to_base64, base64_to_u8 
   return ShamirTSS

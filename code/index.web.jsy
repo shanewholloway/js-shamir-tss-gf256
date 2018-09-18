@@ -11,3 +11,7 @@ export default ShamirSecretShare
 export const ShamirTSS = ShamirSecretShare
 export const generateShares = ShamirSecretShare.generateShares
 export const unlockShares = ShamirSecretShare.unlockShares
+export const generateShares_b64 = ShamirSecretShare.generateShares_b64
+export const unlockShares_b64 = ShamirSecretShare.unlockShares_b64
+
+export @{} isBinarySecret, randomBytes, u8_to_base64, base64_to_u8

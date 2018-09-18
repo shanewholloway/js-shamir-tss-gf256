@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>shamir-tss-gf256 example</title>
+</head>
+
+<body>
+
+<div id='console-log-div'></div>
+<script src='https://unpkg.com/console-log-div@0.6.3/console-log-div.js'></script>
+
+<script src='./umd/shamir-tss-gf256.dbg.js'></script>
+<!-- or src='https://unpkg.com/shamir-tss-gf256@0.3.2/umd/shamir-tss-gf256.min.js' -->
+
+
+<script>
+  // shim require so we can reuse the example.js
+  window.require = module => window[module]
+</script>
+<script src='./example.js'></script>
+
+</body>

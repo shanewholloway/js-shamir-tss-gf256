@@ -2,6 +2,8 @@ export const {randomBytes} = require('crypto')
 
 export function u8_to_base64(u8) ::
   return Buffer.from(u8).toString('base64')
+    .replace(/\+/g, '-').replace(/\//g, '_')
+
 export function base64_to_u8(str_b64) ::
   return Uint8Array.from @ Buffer.from(str_b64, 'base64')
 

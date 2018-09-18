@@ -1,0 +1,51 @@
+const assert = require('assert')
+
+const { generateShares_b64, unlockShares_b64 } = require('shamir-tss-gf256')
+
+import * as util_nodejs from 'shamir-tss-gf256/esm/utils.nodejs.js'
+import * as util_browser from 'shamir-tss-gf256/esm/utils.web.js'
+const browser = 'undefined' !== typeof window
+const { randomBytes, u8_to_base64, base64_to_u8 } = browser ? util_browser : util_nodejs
+
+describe @ 'Shamir Base64 Sharing', @=> ::
+
+  it @ `known secret threshold: 2 total: 4`, @=> ::
+    const known_secret = base64_to_u8 @ '/Vyb7AZeqh0Hx7tPw3Jy8yHbr2Zr00RtkiW3X9UGmZTsbh2VNajR/zOEpNd/U/X7y+BpIIr7w64x+YmMooBg2g=='
+
+    const shares =
+      @[] 'AgFA2MLGSIKPAXdcZpyyOWxxmt-3CJjtLSGcWQSUv3WFNHj9_2AJvJh7brZ8TEyHiIcf5MshdX1lHnPN2q8y0ox9'
+        , 'AgKcTym4mv3gJefqGvIh5E7sTNOfupavlvWO3crSAeChz99TwmRNgEPsieAP-hngDwN46DYib-yU1bWRL8qZJKOP'
+        , 'AgMhy3CS1CHFOZdxxyFQr1Bu99eH1GWR_7mAoXkZa5O9b0vAIJFxlApo1NLXYSo0cn-s7JQjkGoyZfelfOkJdk8o'
+        , 'AgQ_euREJQM-bdyd4i4cRQrN-8vPxYor-0aqzk1eZtHpIooUuGzF-O7ZXEzpjbMuGhC28NckW9VtWCIp3gDU0_1w'
+
+    const known_secret_b64 = u8_to_base64 @ known_secret
+
+    assert.equal @ known_secret_b64, unlockShares_b64 @# shares[0], shares[1]
+    assert.equal @ known_secret_b64, unlockShares_b64 @# shares[0], shares[2]
+    assert.equal @ known_secret_b64, unlockShares_b64 @# shares[0], shares[3]
+    assert.equal @ known_secret_b64, unlockShares_b64 @# shares[1], shares[2]
+    assert.equal @ known_secret_b64, unlockShares_b64 @# shares[1], shares[3]
+    assert.equal @ known_secret_b64, unlockShares_b64 @# shares[2], shares[3]
+
+    assert.equal @ known_secret_b64, unlockShares_b64 @# shares[0], shares[1], shares[2]
+    assert.equal @ known_secret_b64, unlockShares_b64 @# shares[0], shares[1], shares[3]
+    assert.equal @ known_secret_b64, unlockShares_b64 @# shares[0], shares[2], shares[3]
+    assert.equal @ known_secret_b64, unlockShares_b64 @# shares[1], shares[2], shares[3]
+
+    assert.equal @ known_secret_b64, unlockShares_b64 @# shares[0], shares[1], shares[2], shares[3]
+
+
+  for let threshold=1; threshold<=16; threshold*=2 ::
+    describe @ `threshold ${threshold}`, @=> ::
+      for let additional=0; additional<=4; additional+=2 ::
+        const total = threshold + additional
+
+        it @ `round trip threshold: ${threshold} total: ${total}`, @=> ::
+          const secret = randomBytes(64)
+          const shares = generateShares_b64(secret, threshold, total)
+          const secret_rt_b64 = unlockShares_b64(shares)
+          if 0 ::
+            console.dir @ shares
+          assert.equal @ u8_to_base64(secret), secret_rt_b64
+
+

@@ -12,6 +12,7 @@ export function u8_to_base64(u8) ::
   for let i=0; i<len; i++ ::
     res += _fromCharCode(u8[i])
   return btoa(res)
+    .replace(/\+/g, '-').replace(/\//g, '_')
 
 const _charCodeAt = ''.charCodeAt
 export function base64_to_u8(str_b64) ::
