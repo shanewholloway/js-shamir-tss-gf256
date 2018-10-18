@@ -1,98 +1,99 @@
-import {compute_poly, lagrange_interpolate} from './gf256.jsy'
+import { compute_poly, lagrange_interpolate } from './gf256.jsy'
+import { isBinarySecret, randomBytes, u8_to_base64, base64_to_u8 } from './utils.jsy'
 
-export default function({ isBinarySecret, randomBytes, u8_to_base64, base64_to_u8 }) ::
+export class ShamirThresholdSecretShare_GF256 ::
 
-  const ShamirTSS = class ShamirThresholdSecretShare_GF256 ::
+  generate(secret, thresholdShares, totalShares) ::
+    if ! totalShares || totalShares < thresholdShares || ! Number.isInteger(totalShares) ::
+      throw new Error @ "Expected the total count to be greater than the threshold count"
 
-    generate(secret, thresholdShares, totalShares) ::
-      if ! totalShares || totalShares < thresholdShares || ! Number.isInteger(totalShares) ::
-        throw new Error @ "Expected the total count to be greater than the threshold count"
+    return Array.from @
+      this.generator(secret, thresholdShares, totalShares)
 
-      return Array.from @
-        this.generator(secret, thresholdShares, totalShares)
+  generator(secret, thresholdShares, totalShares) ::
+    if ! isBinarySecret(secret) ::
+      throw new Error @ "Expected secret to be a buffer"
 
-    generator(secret, thresholdShares, totalShares) ::
-      if ! isBinarySecret(secret) ::
-        throw new Error @ "Expected secret to be a buffer"
+    if thresholdShares <= 0 ::
+      throw new Error @ "Expected a positive threshold count"
 
-      if thresholdShares <= 0 ::
-        throw new Error @ "Expected a positive threshold count"
+    totalShares |= 0 // force to integer
 
-      totalShares |= 0 // force to integer
+    // initialize random Galois Field polynomials using provided
+    // octects of secret for a0 coefficients
+    const gf_polys = Array.from @ secret, a0_secret => ::
+      let poly = randomBytes(thresholdShares)
+      poly[0] = a0_secret // use specified a0 as secret
+      return poly
 
-      // initialize random Galois Field polynomials using provided
-      // octects of secret for a0 coefficients
-      const gf_polys = Array.from @ secret, a0_secret => ::
-        let poly = randomBytes(thresholdShares)
-        poly[0] = a0_secret // use specified a0 as secret
-        return poly
+    let count=0
+    return @{}
+      [Symbol.iterator]() :: return this
+      _packShare: this._packShare
 
-      let count=0
-      return @{}
-        [Symbol.iterator]() :: return this
-        _packShare: this._packShare
-
-        next() ::
-          // compute the shares given the Galois Field polynomials
-          const x = ++count
-          const y_vec = gf_polys.map @ poly => compute_poly(x, poly)
-          const value = this._packShare(thresholdShares, x, y_vec)
-          const done = totalShares ? totalShares < count : false
-          return { value, done }
-
-
-    unlock(shares, valueIfUnderThreshold) ::
-      shares = Array.from @ shares, this._unpackShare
-      const threshold = shares[0] && shares[0].threshold
-      const unique_x = new Set @ shares.map @ s => s.x
-      if ! threshold || unique_x.size < threshold ::
-        if undefined !== valueIfUnderThreshold ::
-          return valueIfUnderThreshold
-        throw new Error(`Number of shares did not meet threshold to unlock shared secret. (${unique_x.size} of ${threshold}, ${shares.length - unique_x.size} duplicates) `)
-
-      const u = shares.slice(0, threshold).map @ s => s.x
-
-      const v_vec = Array.from @ shares[0].y_vec, (_, i) =>
-        shares.map @ s => s.y_vec[i]
-
-      // Lagrange interpolation integrates the split share into the original secret
-      const secret_octects = lagrange_interpolate(u, v_vec)
-      return Uint8Array.from @ secret_octects
+      next() ::
+        // compute the shares given the Galois Field polynomials
+        const x = ++count
+        const y_vec = gf_polys.map @ poly => compute_poly(x, poly)
+        const value = this._packShare(thresholdShares, x, y_vec)
+        const done = totalShares ? totalShares < count : false
+        return { value, done }
 
 
-    generate_b64(secret, thresholdShares, totalShares) ::
-      if ! totalShares || totalShares < thresholdShares || ! Number.isInteger(totalShares) ::
-        throw new Error @ "Expected the total count to be greater than the threshold count"
+  unlock(shares, valueIfUnderThreshold) ::
+    shares = Array.from @ shares, this._unpackShare
+    const threshold = shares[0] && shares[0].threshold
+    const unique_x = new Set @ shares.map @ s => s.x
+    if ! threshold || unique_x.size < threshold ::
+      if undefined !== valueIfUnderThreshold ::
+        return valueIfUnderThreshold
+      throw new Error(`Number of shares did not meet threshold to unlock shared secret. (${unique_x.size} of ${threshold}, ${shares.length - unique_x.size} duplicates) `)
 
-      return Array.from @
-        this.generator_b64(secret, thresholdShares, totalShares)
+    const u = shares.slice(0, threshold).map @ s => s.x
 
-    generator_b64(secret, thresholdShares, totalShares) ::
-      const iter = this.generator(secret, thresholdShares, totalShares)
-      iter._packShare = this._packShare_b64
-      return iter
+    const v_vec = Array.from @ shares[0].y_vec, (_, i) =>
+      shares.map @ s => s.y_vec[i]
 
-    unlock_b64(shares, valueIfUnderThreshold) ::
-      let res = this.unlock(shares, valueIfUnderThreshold)
-      return res === valueIfUnderThreshold
-        ? res : u8_to_base64(res)
-
-
-    _packShare(threshold, x, y_vec) ::
-      return Uint8Array.from @ [threshold, x].concat(y_vec)
-
-    _packShare_b64(threshold, x, y_vec) ::
-      return u8_to_base64 @ Uint8Array.from @ [threshold, x].concat(y_vec)
-
-    _unpackShare(buf) ::
-      if 'string' === typeof buf ::
-        buf = base64_to_u8(buf, 'base64')
-      else if ! isBinarySecret(buf) ::
-        throw new Error("Share must be a Uint8Array, Buffer, or a string")
-
-      return @{} threshold: buf[0], x: buf[1], y_vec: buf.slice(2)
+    // Lagrange interpolation integrates the split share into the original secret
+    const secret_octects = lagrange_interpolate(u, v_vec)
+    return Uint8Array.from @ secret_octects
 
 
-  Object.assign @ ShamirTSS.prototype, @{}
-    randomBytes, u8_to_base64, base64_to_u8 
-  return ShamirTSS
+  generate_b64(secret, thresholdShares, totalShares) ::
+    if ! totalShares || totalShares < thresholdShares || ! Number.isInteger(totalShares) ::
+      throw new Error @ "Expected the total count to be greater than the threshold count"
+
+    return Array.from @
+      this.generator_b64(secret, thresholdShares, totalShares)
+
+  generator_b64(secret, thresholdShares, totalShares) ::
+    const iter = this.generator(secret, thresholdShares, totalShares)
+    iter._packShare = this._packShare_b64
+    return iter
+
+  unlock_b64(shares, valueIfUnderThreshold) ::
+    let res = this.unlock(shares, valueIfUnderThreshold)
+    return res === valueIfUnderThreshold
+      ? res : u8_to_base64(res)
+
+
+  _packShare(threshold, x, y_vec) ::
+    return Uint8Array.from @ [threshold, x].concat(y_vec)
+
+  _packShare_b64(threshold, x, y_vec) ::
+    return u8_to_base64 @ Uint8Array.from @ [threshold, x].concat(y_vec)
+
+  _unpackShare(buf) ::
+    if 'string' === typeof buf ::
+      buf = base64_to_u8(buf, 'base64')
+    else if ! isBinarySecret(buf) ::
+      throw new Error("Share must be a Uint8Array, Buffer, or a string")
+
+    return @{} threshold: buf[0], x: buf[1], y_vec: buf.slice(2)
+
+
+export default ShamirThresholdSecretShare_GF256
+
+Object.assign @ ShamirThresholdSecretShare_GF256.prototype, @{}
+  randomBytes, u8_to_base64, base64_to_u8 
+
