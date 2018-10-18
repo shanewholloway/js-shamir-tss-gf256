@@ -44,8 +44,6 @@ describe @ 'Shamir Base64 Sharing', @=> ::
           const secret = randomBytes(64)
           const shares = generateShares_b64(secret, threshold, total)
           const secret_rt_b64 = unlockShares_b64(shares)
-          if 0 ::
-            console.dir @ shares
           assert.equal @ u8_to_base64(secret), secret_rt_b64
 
 

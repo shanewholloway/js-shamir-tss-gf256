@@ -12,14 +12,14 @@ export const ShamirTSS = ShamirSecretShare
 export function generateShares(secret, thresholdShares, totalShares) ::
   return new ShamirSecretShare().generate(secret, thresholdShares, totalShares)
 export function generatorShares(secret, thresholdShares, totalShares) ::
-  return new ShamirSecretShare().generatorShares(secret, thresholdShares, totalShares)
+  return new ShamirSecretShare().generator(secret, thresholdShares, totalShares)
 export function unlockShares(shares_of_secret, valueIfUnderThreshold) ::
   return new ShamirSecretShare().unlock(shares_of_secret, valueIfUnderThreshold)
 
 export function generateShares_b64(secret, thresholdShares, totalShares) ::
-  return new ShamirSecretShare().generateShares_b64(secret, thresholdShares, totalShares)
+  return new ShamirSecretShare().generate_b64(secret, thresholdShares, totalShares)
 export function generatorShares_b64(secret, thresholdShares, totalShares) ::
-  return new ShamirSecretShare().generatorShares_b64(secret, thresholdShares, totalShares)
+  return new ShamirSecretShare().generator_b64(secret, thresholdShares, totalShares)
 export function unlockShares_b64(shares_of_secret, valueIfUnderThreshold) ::
   return new ShamirSecretShare().unlock_b64(shares_of_secret, valueIfUnderThreshold)
 
