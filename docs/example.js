@@ -3,6 +3,9 @@ const shamir_tss = require('shamir-tss-gf256')
 const dbg = 'undefined' === typeof window
   ? v => v : v => Array.from(v)
 
+;(function() {
+'use strict'
+
 //const secret = Buffer.from('some string of data')
 const secret = shamir_tss.randomBytes(16) // or any Uint8Array/Buffer
 console.log()
@@ -56,3 +59,4 @@ console.log('Unlocked with excess shares:')
 console.log(dbg(res_over)) // Uint8Array [ 127, 235, 91, 105, 228, 244, 250, 2, 47, 3, 148, 46, 52, 56, 56, 137 ]
 console.log()
 
+}).call(null)
